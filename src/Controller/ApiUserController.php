@@ -46,6 +46,11 @@ class ApiUserController extends AbstractController
         description: 'Invalid data',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
+    #[OA\Response(
+        response: UserRequestHandler::USER_CREATE_CONFLICT_ERROR,
+        description: 'User already exists.',
+        content: new Model(type: BaseResponseErrorDTO::class)
+    )]
     public function createUser(Request $request): JsonResponse
     {
         return $this->userRequestHandler->createUser($request);

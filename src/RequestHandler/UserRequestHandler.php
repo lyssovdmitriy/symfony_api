@@ -24,6 +24,7 @@ final class UserRequestHandler
     const USER_CREATE_SUCCESS = Response::HTTP_CREATED;
     const USER_CREATE_ERROR = Response::HTTP_BAD_REQUEST;
     const USER_CREATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
+    const USER_CREATE_CONFLICT_ERROR = Response::HTTP_CONFLICT;
 
 
     public function __construct(
