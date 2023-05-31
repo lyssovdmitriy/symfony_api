@@ -7,7 +7,6 @@ namespace App\Service;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
 use App\Exception\ApiException;
-use App\Repository\UserRepository;
 use App\RequestHandler\UserRequestHandler;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -18,7 +17,6 @@ class UserService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private UserRepository $userRepository,
         private UserPasswordHasherInterface $passwordHasher,
     ) {
     }
