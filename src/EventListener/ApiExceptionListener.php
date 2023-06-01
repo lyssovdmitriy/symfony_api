@@ -37,7 +37,7 @@ final class ApiExceptionListener
         }
 
         if ($exception instanceof UserNotFountException) {
-            $event->setResponse($this->responseService->createErrorResponse(UserRequestHandler::USER_NOT_FOUNT, $exception->getMessage(), [], $exception->getCode()));
+            $event->setResponse($this->responseService->createErrorResponse(UserRequestHandler::USER_NOT_FOUND, $exception->getMessage(), [], $exception->getCode()));
         }
     }
 }

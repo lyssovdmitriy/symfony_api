@@ -3,7 +3,7 @@
 namespace App\Tests\Service;
 
 use App\DTO\BaseResponse\BaseResponseErrorDTO;
-use App\DTO\User\UserCreateResponseSuccessDTO;
+use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
 use App\Service\ResponseService;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +21,7 @@ class ResponseServiceTest extends TestCase
 
     public function testCreateSuccessResponse(): void
     {
-        $dto = new UserCreateResponseSuccessDTO(new UserDTO());
+        $dto = new UserResponseSuccessDTO(new UserDTO());
         $response = $this->responseService->createSuccessResponse($dto);
 
         $this->assertInstanceOf(JsonResponse::class, $response);

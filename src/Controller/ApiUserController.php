@@ -7,7 +7,7 @@ namespace App\Controller;
 use App\DTO\BaseResponse\BaseResponseErrorDTO;
 use App\DTO\BaseResponse\BaseResponseSuccessDTO;
 use OpenApi\Attributes as OA;
-use App\DTO\User\UserCreateResponseSuccessDTO;
+use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
 use App\RequestHandler\UserRequestHandler;
@@ -28,6 +28,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
         new OA\Property(type: 'string', property: 'message', example: 'Invalid credentials.'),
     ])
 )]
+#[OA\Tag(name: "Users")]
 class ApiUserController extends AbstractController
 {
 
@@ -38,7 +39,6 @@ class ApiUserController extends AbstractController
 
 
     #[Route('/api/users', methods: ['POST'])]
-    #[OA\Tag(name: "Users")]
     #[OA\Post(
         path: '/api/users',
         requestBody: new OA\RequestBody(content: new OA\JsonContent(ref: new Model(type: UserDTO::class, groups: ['create']))),
@@ -47,7 +47,7 @@ class ApiUserController extends AbstractController
     #[OA\Response(
         response: UserRequestHandler::USER_CREATE_SUCCESS,
         description: 'Successful response',
-        content: new Model(type: UserCreateResponseSuccessDTO::class, groups: ['get'])
+        content: new Model(type: UserResponseSuccessDTO::class, groups: ['get'])
     )]
     #[OA\Response(
         response: UserRequestHandler::USER_CREATE_ERROR,
@@ -72,20 +72,19 @@ class ApiUserController extends AbstractController
 
 
     #[Route('/api/users/{id}', methods: ['GET'])]
-    #[OA\Tag(name: "Users")]
     #[OA\Response(
         response: UserRequestHandler::USER_GET_SUCCESS,
         description: 'Successful response',
-        content: new Model(type: UserDTO::class, groups: ['get'])
+        content: new Model(type: UserResponseSuccessDTO::class, groups: ['get'])
     )]
-    #[Security(name: 'Bearer')]
+
     #[OA\Response(
         response: Response::HTTP_FORBIDDEN,
         description: 'Access denied',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_NOT_FOUNT,
+        response: UserRequestHandler::USER_NOT_FOUND,
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
@@ -97,7 +96,6 @@ class ApiUserController extends AbstractController
 
 
     #[Route('/api/users/{id}', methods: ['PUT'])]
-    #[OA\Tag(name: "Users")]
     #[OA\Put(
         path: '/api/users/{id}',
         requestBody: new OA\RequestBody(content: new OA\JsonContent(ref: new Model(type: UserDTO::class, groups: ['update']))),
@@ -106,16 +104,16 @@ class ApiUserController extends AbstractController
     #[OA\Response(
         response: UserRequestHandler::USER_GET_SUCCESS,
         description: 'Successful response',
-        content: new Model(type: UserDTO::class, groups: ['update'])
+        content: new Model(type: UserResponseSuccessDTO::class, groups: ['update'])
     )]
-    #[Security(name: 'Bearer')]
+
     #[OA\Response(
         response: Response::HTTP_FORBIDDEN,
         description: 'Access denied',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_NOT_FOUNT,
+        response: UserRequestHandler::USER_NOT_FOUND,
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
@@ -128,20 +126,19 @@ class ApiUserController extends AbstractController
 
 
     #[Route('/api/users/{id}', methods: ['DELETE'])]
-    #[OA\Tag(name: "Users")]
     #[OA\Response(
         response: Response::HTTP_OK,
         description: 'Successful response',
         content: new Model(type: BaseResponseSuccessDTO::class)
     )]
-    #[Security(name: 'Bearer')]
+
     #[OA\Response(
         response: Response::HTTP_FORBIDDEN,
         description: 'Access denied',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_NOT_FOUNT,
+        response: UserRequestHandler::USER_NOT_FOUND,
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]

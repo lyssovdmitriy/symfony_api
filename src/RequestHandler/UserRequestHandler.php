@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\RequestHandler;
 
 use App\DTO\BaseResponse\BaseResponseSuccessDTO;
-use App\DTO\User\UserCreateResponseSuccessDTO;
+use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
 use App\Exception\ApiException;
@@ -26,7 +26,7 @@ final class UserRequestHandler
     const USER_CREATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
     const USER_CREATE_CONFLICT_ERROR = Response::HTTP_CONFLICT;
     const USER_GET_SUCCESS = Response::HTTP_OK;
-    const USER_NOT_FOUNT = Response::HTTP_NOT_FOUND;
+    const USER_NOT_FOUND = Response::HTTP_NOT_FOUND;
     const USER_UPDATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
 
 
@@ -53,7 +53,7 @@ final class UserRequestHandler
         }
 
         $user = $this->userService->createUser($dto);
-        $responseDto = new UserCreateResponseSuccessDTO($this->populateDTOFromEntity($user, UserDTO::class, ['get']));
+        $responseDto = new UserResponseSuccessDTO($this->populateDTOFromEntity($user, UserDTO::class, ['get']));
         return $this->responseService->createSuccessResponse($responseDto, self::USER_CREATE_SUCCESS);
     }
 
@@ -89,11 +89,13 @@ final class UserRequestHandler
     public function getUser(int $id): JsonResponse
     {
         return $this->responseService->createSuccessResponse(
-            $this->populateDTOFromEntity(
-                $this->userService->getUser($id),
-                UserDTO::class,
-                ['get']
-            ),
+            new UserResponseSuccessDTO(
+                $this->populateDTOFromEntity(
+                    $this->userService->getUser($id),
+                    UserDTO::class,
+                    ['get']
+                )
+            )
         );
     }
 
@@ -110,11 +112,13 @@ final class UserRequestHandler
         $this->userService->updateUser($user, $userDto);
 
         return $this->responseService->createSuccessResponse(
-            $this->populateDTOFromEntity(
-                $user,
-                UserDTO::class,
-                ['get']
-            ),
+            new UserResponseSuccessDTO(
+                $this->populateDTOFromEntity(
+                    $user,
+                    UserDTO::class,
+                    ['get']
+                )
+            )
         );
     }
 
