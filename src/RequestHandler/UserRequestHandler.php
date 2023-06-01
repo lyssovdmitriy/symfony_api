@@ -6,6 +6,7 @@ namespace App\RequestHandler;
 
 use App\DTO\User\UserCreateResponseSuccessDTO;
 use App\DTO\User\UserDTO;
+use App\Entity\User;
 use App\Exception\ApiException;
 use App\Service\ResponseService;
 use App\Service\UserService;
@@ -24,7 +25,8 @@ final class UserRequestHandler
     const USER_CREATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
     const USER_CREATE_CONFLICT_ERROR = Response::HTTP_CONFLICT;
     const USER_GET_SUCCESS = Response::HTTP_OK;
-    const USER_GET_NOT_FOUNT = Response::HTTP_NOT_FOUND;
+    const USER_NOT_FOUNT = Response::HTTP_NOT_FOUND;
+    const USER_UPDATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
 
 
     public function __construct(
@@ -38,12 +40,12 @@ final class UserRequestHandler
     public function createUser(Request $request): JsonResponse
     {
         try {
-            $dto = $this->deserializeUserCreateDTO($request);
+            $dto = $this->deserializeUserDTO($request);
         } catch (\Throwable $th) {
             throw new ApiException(self::USER_CREATE_ERROR, $th->getMessage(), ['JSON parsing error: Invalid JSON syntax'], $th);
         }
 
-        $validationErrors = $this->validationService->validateUserCreateDTO($dto);
+        $validationErrors = $this->validationService->validateUserDTO($dto);
 
         if (count($validationErrors) > 0) {
             throw new ApiException(self::USER_CREATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
@@ -54,7 +56,7 @@ final class UserRequestHandler
         return $this->responseService->createSuccessResponse($responseDto, self::USER_CREATE_SUCCESS);
     }
 
-    private function deserializeUserCreateDTO(Request $request): UserDTO
+    private function deserializeUserDTO(Request $request): UserDTO
     {
         try {
             $dto = $this->serializer->deserialize($request->getContent(), UserDTO::class, 'json');
@@ -65,12 +67,12 @@ final class UserRequestHandler
     }
 
     /**
-     * @param object $entity
+     * @param User $entity
      * @param string $type
      * @param string[] $groups
      * @return UserDTO
      */
-    private function populateDTOFromEntity(object $entity, string $type, array $groups): UserDTO
+    private function populateDTOFromEntity(User $entity, string $type, array $groups): UserDTO
     {
         /** @var UserDTO $dto */
         $dto = $this->serializer->deserialize(
@@ -85,11 +87,26 @@ final class UserRequestHandler
 
     public function getUser(int $id): JsonResponse
     {
+        return $this->responseService->createSuccessResponse(
+            $this->populateDTOFromEntity(
+                $this->userService->getUser($id),
+                UserDTO::class,
+                ['get']
+            ),
+        );
+    }
+
+
+    public function updateUser(int $id, Request $request): JsonResponse
+    {
+        $userDto = $this->deserializeUserDTO($request);
+        $validationErrors = $this->validationService->validateUserDTO($userDto);
+        if (count($validationErrors) > 0) {
+            throw new ApiException(self::USER_UPDATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
+        }
         $user = $this->userService->getUser($id);
 
-        if (null === $user) {
-            throw new ApiException(self::USER_GET_NOT_FOUNT, 'User not found');
-        }
+        $this->userService->updateUser($user, $userDto);
 
         return $this->responseService->createSuccessResponse(
             $this->populateDTOFromEntity(

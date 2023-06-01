@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\DTO\BaseResponse\BaseResponseErrorDTO;
-use App\DTO\BaseResponse\ResponseDTOInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 

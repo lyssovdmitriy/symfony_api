@@ -18,7 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ApiUserController extends AbstractController
 {
@@ -27,6 +26,9 @@ class ApiUserController extends AbstractController
         private UserRequestHandler $userRequestHandler,
     ) {
     }
+
+
+
 
 
     #[Route('/api/users', methods: ['POST'])]
@@ -63,6 +65,9 @@ class ApiUserController extends AbstractController
 
 
 
+
+
+
     #[Route('/api/users/{id}', methods: ['GET'])]
     #[OA\Tag(name: "Users")]
     #[OA\Response(
@@ -77,7 +82,7 @@ class ApiUserController extends AbstractController
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_GET_NOT_FOUNT,
+        response: UserRequestHandler::USER_NOT_FOUNT,
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
@@ -90,5 +95,43 @@ class ApiUserController extends AbstractController
             throw new AccessDeniedHttpException('Access denied.');
         }
         return $this->userRequestHandler->getUser($id);
+    }
+
+
+
+
+
+    #[Route('/api/users/{id}', methods: ['PUT'])]
+    #[OA\Tag(name: "Users")]
+    #[OA\Put(
+        path: '/api/users/{id}',
+        requestBody: new OA\RequestBody(content: new OA\JsonContent(ref: new Model(type: UserDTO::class, groups: ['update']))),
+        description: 'Creating a new user'
+    )]
+    #[OA\Response(
+        response: UserRequestHandler::USER_GET_SUCCESS,
+        description: 'Successful response',
+        content: new Model(type: UserDTO::class, groups: ['update'])
+    )]
+    #[Security(name: 'Bearer')]
+    #[OA\Response(
+        response: Response::HTTP_FORBIDDEN,
+        description: 'Access denied',
+        content: new Model(type: BaseResponseErrorDTO::class)
+    )]
+    #[OA\Response(
+        response: UserRequestHandler::USER_NOT_FOUNT,
+        description: 'User not found',
+        content: new Model(type: BaseResponseErrorDTO::class)
+    )]
+    public function updateUser(int $id, Request $request): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        /** @var User */
+        $user = $this->getUser();
+        if ($user->getId() !== $id && !in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            throw new AccessDeniedHttpException('Access denied.');
+        }
+        return $this->userRequestHandler->updateUser($id, $request);
     }
 }

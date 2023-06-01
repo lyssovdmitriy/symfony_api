@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\EventListener;
 
 use App\Exception\ApiException;
+use App\Exception\UserCreateConflictException;
+use App\Exception\UserNotFountException;
+use App\RequestHandler\UserRequestHandler;
 use App\Service\ResponseService;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -27,6 +30,14 @@ final class ApiExceptionListener
                 $errors = $exception->getErrors();
             }
             $event->setResponse($this->responseService->createErrorResponse($exception->getStatusCode(), $exception->getMessage(), $errors, $exception->getCode()));
+        }
+
+        if ($exception instanceof UserCreateConflictException) {
+            $event->setResponse($this->responseService->createErrorResponse(UserRequestHandler::USER_CREATE_CONFLICT_ERROR, $exception->getMessage(), [], $exception->getCode()));
+        }
+
+        if ($exception instanceof UserNotFountException) {
+            $event->setResponse($this->responseService->createErrorResponse(UserRequestHandler::USER_NOT_FOUNT, $exception->getMessage(), [], $exception->getCode()));
         }
     }
 }

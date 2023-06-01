@@ -4,12 +4,11 @@ namespace App\Tests\Service;
 
 use App\DTO\User\UserDTO;
 use App\Entity\User;
-use App\Exception\ApiException;
+use App\Exception\UserCreateConflictException;
 use App\Repository\UserRepository;
 use App\Service\UserService;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\DBAL\Exception\DriverException as DBALDriverException;
@@ -79,7 +78,7 @@ class UserServiceTest extends TestCase
             ->method('save')
             ->willThrowException($exception);
 
-        $this->expectException(ApiException::class);
+        $this->expectException(UserCreateConflictException::class);
         $this->expectExceptionMessage('User already exists.');
         $this->userService->createUser($dto);
     }

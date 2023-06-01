@@ -6,9 +6,9 @@ namespace App\Service;
 
 use App\DTO\User\UserDTO;
 use App\Entity\User;
-use App\Exception\ApiException;
+use App\Exception\UserCreateConflictException;
+use App\Exception\UserNotFountException;
 use App\Repository\UserRepository;
-use App\RequestHandler\UserRequestHandler;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -33,15 +33,35 @@ class UserService
         try {
             $this->userRepository->save($user, true);
         } catch (UniqueConstraintViolationException $exception) {
-            throw new ApiException(UserRequestHandler::USER_CREATE_CONFLICT_ERROR, 'User already exists.', ['The user with the provided email already exists in the system.'], $exception);
+            throw new UserCreateConflictException('User already exists.', previous: $exception);
         }
 
         return $user;
     }
 
-
-    public function getUser(int $id): ?User
+    public function getUser(int $id): User
     {
-        return $this->userRepository->getUserById($id);
+        $user = $this->userRepository->getUserById($id);
+        if (null === $user) {
+            throw new UserNotFountException('User not found');
+        }
+        return $user;
+    }
+
+    public function updateUser(User $user, UserDTO $userDTO): void
+    {
+
+        $changer = [
+            'address' => fn () => $user->setAddress($userDTO->address),
+            'birthday' => fn () => $user->setBirthday(new DateTimeImmutable($userDTO->birthday)),
+            'phone' => fn () => $user->setPhone($userDTO->phone),
+            'password' => fn () => $user->setPassword($this->passwordHasher->hashPassword($user, $userDTO->password)),
+        ];
+
+        foreach ($changer as $field => $func) {
+            in_array($field, array_keys((array)$userDTO), true) ? $func() : null;
+        }
+
+        $this->userRepository->save($user, true);
     }
 }

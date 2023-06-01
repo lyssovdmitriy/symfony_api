@@ -36,7 +36,7 @@ class ValidationServiceTest extends TestCase
             ->with($dto)
             ->willReturn($constraintViolationList);
 
-        $errors = $this->validationService->validateUserCreateDTO($dto);
+        $errors = $this->validationService->validateUserDTO($dto);
 
         $this->assertEmpty($errors);
     }
@@ -63,7 +63,7 @@ class ValidationServiceTest extends TestCase
             ->with($dto)
             ->willReturn($constraintViolationList);
 
-        $errors = $this->validationService->validateUserCreateDTO($dto);
+        $errors = $this->validationService->validateUserDTO($dto);
 
         $this->assertCount(2, $errors);
         $this->assertContains('The email value should not be blank.', $errors);
