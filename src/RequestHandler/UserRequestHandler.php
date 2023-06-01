@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\RequestHandler;
 
+use App\DTO\BaseResponse\BaseResponseSuccessDTO;
 use App\DTO\User\UserCreateResponseSuccessDTO;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
@@ -115,5 +116,12 @@ final class UserRequestHandler
                 ['get']
             ),
         );
+    }
+
+
+    public function deleteUser(int $id): JsonResponse
+    {
+        $this->userService->deleteUser($id);
+        return $this->responseService->createSuccessResponse(new BaseResponseSuccessDTO());
     }
 }

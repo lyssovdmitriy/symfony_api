@@ -64,4 +64,10 @@ class UserService
 
         $this->userRepository->save($user, true);
     }
+
+
+    public function deleteUser(int $id): void
+    {
+        $this->userRepository->remove($this->getUser($id), true);
+    }
 }

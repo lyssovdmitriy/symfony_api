@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\BaseResponse\BaseResponseErrorDTO;
+use App\DTO\BaseResponse\BaseResponseSuccessDTO;
 use OpenApi\Attributes as OA;
 use App\DTO\User\UserCreateResponseSuccessDTO;
 use App\DTO\User\UserDTO;
@@ -19,6 +20,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
+#[OA\Response(
+    response: Response::HTTP_UNAUTHORIZED,
+    description: 'Invalid credentials.',
+    content: new OA\JsonContent(properties: [
+        new OA\Property(type: 'int', property: 'code', example: 401),
+        new OA\Property(type: 'string', property: 'message', example: 'Invalid credentials.'),
+    ])
+)]
 class ApiUserController extends AbstractController
 {
 
@@ -26,9 +35,6 @@ class ApiUserController extends AbstractController
         private UserRequestHandler $userRequestHandler,
     ) {
     }
-
-
-
 
 
     #[Route('/api/users', methods: ['POST'])]
@@ -65,9 +71,6 @@ class ApiUserController extends AbstractController
 
 
 
-
-
-
     #[Route('/api/users/{id}', methods: ['GET'])]
     #[OA\Tag(name: "Users")]
     #[OA\Response(
@@ -86,19 +89,11 @@ class ApiUserController extends AbstractController
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
-    public function getUsers(int $id): JsonResponse
+    public function getUserById(int $id): JsonResponse
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        /** @var User */
-        $user = $this->getUser();
-        if ($user->getId() !== $id && !in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-            throw new AccessDeniedHttpException('Access denied.');
-        }
+        $this->checkAuthForUserAction($id);
         return $this->userRequestHandler->getUser($id);
     }
-
-
-
 
 
     #[Route('/api/users/{id}', methods: ['PUT'])]
@@ -124,7 +119,41 @@ class ApiUserController extends AbstractController
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
-    public function updateUser(int $id, Request $request): JsonResponse
+    public function updateUserById(int $id, Request $request): JsonResponse
+    {
+        $this->checkAuthForUserAction($id);
+        return $this->userRequestHandler->updateUser($id, $request);
+    }
+
+
+
+    #[Route('/api/users/{id}', methods: ['DELETE'])]
+    #[OA\Tag(name: "Users")]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Successful response',
+        content: new Model(type: BaseResponseSuccessDTO::class)
+    )]
+    #[Security(name: 'Bearer')]
+    #[OA\Response(
+        response: Response::HTTP_FORBIDDEN,
+        description: 'Access denied',
+        content: new Model(type: BaseResponseErrorDTO::class)
+    )]
+    #[OA\Response(
+        response: UserRequestHandler::USER_NOT_FOUNT,
+        description: 'User not found',
+        content: new Model(type: BaseResponseErrorDTO::class)
+    )]
+    public function deleteUserById(int $id): JsonResponse
+    {
+        $this->checkAuthForUserAction($id);
+        return $this->userRequestHandler->deleteUser($id);
+    }
+
+
+
+    private function checkAuthForUserAction(int $id): void
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         /** @var User */
@@ -132,6 +161,5 @@ class ApiUserController extends AbstractController
         if ($user->getId() !== $id && !in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             throw new AccessDeniedHttpException('Access denied.');
         }
-        return $this->userRequestHandler->updateUser($id, $request);
     }
 }
