@@ -10,14 +10,11 @@ use App\Exception\ApiException;
 use App\Service\ResponseService;
 use App\Service\UserService;
 use App\Service\ValidationService;
-use App\Transformer\UserTransformer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class UserRequestHandler
 {
@@ -46,7 +43,7 @@ final class UserRequestHandler
 
         $validationErrors = $this->validationService->validateUserCreateDTO($dto);
 
-        if (!empty($validationErrors)) {
+        if (count($validationErrors) > 0) {
             throw new ApiException(self::USER_CREATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
         }
 

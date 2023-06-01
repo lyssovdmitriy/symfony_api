@@ -16,7 +16,11 @@ use Doctrine\DBAL\Exception\DriverException as DBALDriverException;
 class UserServiceTest extends TestCase
 {
     private UserService $userService;
+
+    /** @var \PHPUnit\Framework\MockObject\MockObject */
     private EntityManagerInterface $entityManager;
+
+    /** @var \PHPUnit\Framework\MockObject\MockObject */
     private UserPasswordHasherInterface $passwordHasher;
 
     protected function setUp(): void
@@ -39,21 +43,18 @@ class UserServiceTest extends TestCase
         $dto->birthday = '1990-01-01';
         $dto->phone = '1234567890';
 
-        $hasher = $this->createMock(UserPasswordHasherInterface::class);
         $hashedPassword = 'hashed_password';
-        $hasher->expects($this->once())
+        $this->passwordHasher->expects($this->once())
             ->method('hashPassword')
             ->with($this->isInstanceOf(User::class), $dto->password)
             ->willReturn($hashedPassword);
 
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->expects($this->once())
+        $this->entityManager->expects($this->once())
             ->method('persist');
-        $entityManager->expects($this->once())
+        $this->entityManager->expects($this->once())
             ->method('flush');
 
-        $userService = new UserService($entityManager, $hasher);
-        $user = $userService->createUser($dto);
+        $user = $this->userService->createUser($dto);
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals($dto->email, $user->getEmail());
