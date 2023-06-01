@@ -1,7 +1,5 @@
-includes:
-    - vendor/phpstan/phpstan-strict-rules/rules.neon
-
 parameters:
     level: 9
-    ##ignoreErrors:
-    ##    - '#Dynamic call to static method#'
+    doctrine:
+        objectManagerLoader: tests/object-manager.php
+        allowNullablePropertyForRequiredField: true
