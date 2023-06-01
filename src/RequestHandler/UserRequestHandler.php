@@ -23,6 +23,8 @@ final class UserRequestHandler
     const USER_CREATE_ERROR = Response::HTTP_BAD_REQUEST;
     const USER_CREATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
     const USER_CREATE_CONFLICT_ERROR = Response::HTTP_CONFLICT;
+    const USER_GET_SUCCESS = Response::HTTP_OK;
+    const USER_GET_NOT_FOUNT = Response::HTTP_NOT_FOUND;
 
 
     public function __construct(
@@ -79,5 +81,22 @@ final class UserRequestHandler
         );
 
         return $dto;
+    }
+
+    public function getUser(int $id): JsonResponse
+    {
+        $user = $this->userService->getUser($id);
+
+        if (null === $user) {
+            throw new ApiException(self::USER_GET_NOT_FOUNT, 'User not found');
+        }
+
+        return $this->responseService->createSuccessResponse(
+            $this->populateDTOFromEntity(
+                $user,
+                UserDTO::class,
+                ['get']
+            ),
+        );
     }
 }

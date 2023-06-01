@@ -5,6 +5,7 @@ namespace App\Tests\Service;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
 use App\Exception\ApiException;
+use App\Repository\UserRepository;
 use App\Service\UserService;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -18,19 +19,19 @@ class UserServiceTest extends TestCase
     private UserService $userService;
 
     /** @var \PHPUnit\Framework\MockObject\MockObject */
-    private EntityManagerInterface $entityManager;
+    private UserPasswordHasherInterface $passwordHasher;
 
     /** @var \PHPUnit\Framework\MockObject\MockObject */
-    private UserPasswordHasherInterface $passwordHasher;
+    private UserRepository $userRepository;
 
     protected function setUp(): void
     {
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->userRepository = $this->createMock(UserRepository::class);
         $this->passwordHasher = $this->createMock(UserPasswordHasherInterface::class);
 
         $this->userService = new UserService(
-            $this->entityManager,
-            $this->passwordHasher
+            $this->passwordHasher,
+            $this->userRepository,
         );
     }
 
@@ -49,10 +50,8 @@ class UserServiceTest extends TestCase
             ->with($this->isInstanceOf(User::class), $dto->password)
             ->willReturn($hashedPassword);
 
-        $this->entityManager->expects($this->once())
-            ->method('persist');
-        $this->entityManager->expects($this->once())
-            ->method('flush');
+        $this->userRepository->expects($this->once())
+            ->method('save');
 
         $user = $this->userService->createUser($dto);
 
@@ -76,8 +75,8 @@ class UserServiceTest extends TestCase
         $driverException = $this->createMock(DBALDriverException::class);
         $exception = new UniqueConstraintViolationException($driverException, null);
 
-        $this->entityManager->expects($this->once())
-            ->method('flush')
+        $this->userRepository->expects($this->once())
+            ->method('save')
             ->willThrowException($exception);
 
         $this->expectException(ApiException::class);

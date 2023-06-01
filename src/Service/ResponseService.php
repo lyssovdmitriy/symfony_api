@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ResponseService
 {
-    public function createSuccessResponse(ResponseDTOInterface $dto, int $statusCode = Response::HTTP_OK): JsonResponse
+    public function createSuccessResponse(object $dto, int $statusCode = Response::HTTP_OK): JsonResponse
     {
         return new JsonResponse($dto, $statusCode);
     }

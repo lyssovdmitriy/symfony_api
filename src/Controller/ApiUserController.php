@@ -8,12 +8,17 @@ use App\DTO\BaseResponse\BaseResponseErrorDTO;
 use OpenApi\Attributes as OA;
 use App\DTO\User\UserCreateResponseSuccessDTO;
 use App\DTO\User\UserDTO;
+use App\Entity\User;
 use App\RequestHandler\UserRequestHandler;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ApiUserController extends AbstractController
 {
@@ -54,5 +59,36 @@ class ApiUserController extends AbstractController
     public function createUser(Request $request): JsonResponse
     {
         return $this->userRequestHandler->createUser($request);
+    }
+
+
+
+    #[Route('/api/users/{id}', methods: ['GET'])]
+    #[OA\Tag(name: "Users")]
+    #[OA\Response(
+        response: UserRequestHandler::USER_GET_SUCCESS,
+        description: 'Successful response',
+        content: new Model(type: UserDTO::class, groups: ['get'])
+    )]
+    #[Security(name: 'Bearer')]
+    #[OA\Response(
+        response: Response::HTTP_FORBIDDEN,
+        description: 'Access denied',
+        content: new Model(type: BaseResponseErrorDTO::class)
+    )]
+    #[OA\Response(
+        response: UserRequestHandler::USER_GET_NOT_FOUNT,
+        description: 'User not found',
+        content: new Model(type: BaseResponseErrorDTO::class)
+    )]
+    public function getUsers(int $id): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        /** @var User */
+        $user = $this->getUser();
+        if ($user->getId() !== $id && !in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            throw new AccessDeniedHttpException('Access denied.');
+        }
+        return $this->userRequestHandler->getUser($id);
     }
 }
