@@ -12,6 +12,9 @@ class BaseResponseErrorDTO
     #[OA\Property(type: 'bool', example: false)]
     public bool $success = false;
 
+    /**
+     * @var mixed[]
+     */
     #[OA\Property(
         type: 'array',
         items: new OA\Items(
@@ -28,7 +31,7 @@ class BaseResponseErrorDTO
     /**
      * @param integer $code
      * @param string $message
-     * @param string[] $details
+     * @param mixed[] $details
      */
     public function __construct(int $code, string $message, array $details)
     {

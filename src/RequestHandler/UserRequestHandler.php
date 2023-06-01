@@ -11,6 +11,7 @@ use App\Service\ResponseService;
 use App\Service\UserService;
 use App\Service\ValidationService;
 use App\Transformer\UserTransformer;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -29,16 +30,13 @@ final class UserRequestHandler
 
     public function __construct(
         private SerializerInterface $serializer,
-        private NormalizerInterface $normalizer,
-        private ValidatorInterface $validator,
         private ValidationService $validationService,
         private UserService $userService,
-        private UserTransformer $userTransformer,
         private ResponseService $responseService,
     ) {
     }
 
-    public function createUser(Request $request): Response
+    public function createUser(Request $request): JsonResponse
     {
         try {
             $dto = $this->deserializeUserCreateDTO($request);
@@ -67,13 +65,22 @@ final class UserRequestHandler
         return $dto;
     }
 
-    private function populateDTOFromEntity(object $entity, string $type, array $groups): object
+    /**
+     * @param object $entity
+     * @param string $type
+     * @param string[] $groups
+     * @return UserDTO
+     */
+    private function populateDTOFromEntity(object $entity, string $type, array $groups): UserDTO
     {
-        return $this->serializer->deserialize(
+        /** @var UserDTO $dto */
+        $dto = $this->serializer->deserialize(
             $this->serializer->serialize($entity, 'json'),
             $type,
             'json',
             [AbstractNormalizer::GROUPS => $groups]
         );
+
+        return $dto;
     }
 }

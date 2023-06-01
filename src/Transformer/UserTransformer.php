@@ -6,6 +6,10 @@ use App\Entity\User;
 
 class UserTransformer
 {
+    /**
+     * @param User $user
+     * @return mixed[]
+     */
     public function transform(User $user): array
     {
         return [

@@ -15,16 +15,23 @@ class ValidationService
     ) {
     }
 
+    /**
+     * @param UserDTO $dto
+     * @return mixed[]
+     */
     public function validateUserCreateDTO(UserDTO $dto): array
     {
         $list = $this->validator->validate($dto);
         return $this->getErrorsFromConstraintViolation($list);
     }
 
+    /**
+     * @param ConstraintViolationListInterface $violationList
+     * @return mixed[]
+     */
     private function getErrorsFromConstraintViolation(ConstraintViolationListInterface $violationList): array
     {
         $errorMessages = [];
-        /** @var ConstraintViolation $violation **/
         foreach ($violationList as $violation) {
             $errorMessages[] = $violation->getMessage();
         }
