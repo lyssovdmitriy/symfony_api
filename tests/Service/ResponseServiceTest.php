@@ -35,7 +35,7 @@ class ResponseServiceTest extends TestCase
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        $expectedErrorDto = new BaseResponseErrorDTO(0, 'Something went wrong', []);
+        $expectedErrorDto = new BaseResponseErrorDTO(Response::HTTP_BAD_REQUEST, 'Something went wrong', []);
         $this->assertEquals(json_encode($expectedErrorDto), $response->getContent());
     }
 }

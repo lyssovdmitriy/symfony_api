@@ -19,8 +19,8 @@ class BaseResponseErrorDTO
         type: 'array',
         items: new OA\Items(
             properties: [
-                new OA\Property(type: 'int', property: 'code', example: 1),
-                new OA\Property(type: 'string', property: 'message', example: 'Some error'),
+                new OA\Property(type: 'int', property: 'code', example: 400),
+                new OA\Property(type: 'string', property: 'message', example: 'Bad request'),
                 new OA\Property(type: 'array', property: 'details', items: new OA\Items(type: 'string')),
             ]
         )

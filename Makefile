@@ -8,7 +8,7 @@ PHP_CONT = $(DOCKER_COMP) exec php
 PHP      = $(PHP_CONT) php
 COMPOSER = $(PHP_CONT) composer
 SYMFONY  = $(PHP) bin/console
-PHPUNIT      = $(PHP) vendor/bin/phpunit
+PHPUNIT      = $(PHP) bin/phpunit
 PHPSTAN      = $(PHP) vendor/bin/phpstan
 
 # Misc

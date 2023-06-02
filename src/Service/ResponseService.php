@@ -24,6 +24,7 @@ class ResponseService
      */
     public function createErrorResponse(int $statusCode = Response::HTTP_BAD_REQUEST, string $message = 'Something went wrong', array $errors = [], int $code = 0): JsonResponse
     {
+        $code = $statusCode;
         return new JsonResponse(new BaseResponseErrorDTO($code, $message, $errors), $statusCode);
     }
 }
