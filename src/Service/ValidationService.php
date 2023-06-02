@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\DTO\User\UserDTO;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -16,10 +15,10 @@ class ValidationService
     }
 
     /**
-     * @param UserDTO $dto
+     * @param object $dto
      * @return mixed[]
      */
-    public function validateUserDTO(UserDTO $dto): array
+    public function validateDTO(object $dto): array
     {
         $list = $this->validator->validate($dto);
         return $this->getErrorsFromConstraintViolation($list);

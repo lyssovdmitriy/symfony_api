@@ -1,5 +1,7 @@
 parameters:
     level: 9
+    checkGenericClassInNonGenericObjectType: false
     doctrine:
         objectManagerLoader: tests/object-manager.php
         allowNullablePropertyForRequiredField: true
+        

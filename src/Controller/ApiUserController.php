@@ -12,7 +12,6 @@ use App\DTO\User\UserDTO;
 use App\Entity\User;
 use App\RequestHandler\UserRequestHandler;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;

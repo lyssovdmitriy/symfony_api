@@ -7,7 +7,7 @@ namespace App\Service;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
 use App\Exception\UserCreateConflictException;
-use App\Exception\UserNotFountException;
+use App\Exception\NotFountException;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -43,7 +43,7 @@ class UserService
     {
         $user = $this->userRepository->getUserById($id);
         if (null === $user) {
-            throw new UserNotFountException('User not found');
+            throw new NotFountException('User not found');
         }
         return $user;
     }

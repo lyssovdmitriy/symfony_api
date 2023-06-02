@@ -9,6 +9,7 @@ use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
 use App\Exception\ApiException;
+use App\Service\PopulateService;
 use App\Service\ResponseService;
 use App\Service\UserService;
 use App\Service\ValidationService;
@@ -35,25 +36,22 @@ final class UserRequestHandler
         private ValidationService $validationService,
         private UserService $userService,
         private ResponseService $responseService,
+        private PopulateService $populateService,
     ) {
     }
 
     public function createUser(Request $request): JsonResponse
     {
-        try {
-            $dto = $this->deserializeUserDTO($request);
-        } catch (\Throwable $th) {
-            throw new ApiException(self::USER_CREATE_ERROR, $th->getMessage(), ['JSON parsing error: Invalid JSON syntax'], $th);
-        }
-
-        $validationErrors = $this->validationService->validateUserDTO($dto);
+        $dto = $this->deserializeUserDTO($request);
+        $validationErrors = $this->validationService->validateDTO($dto);
 
         if (count($validationErrors) > 0) {
             throw new ApiException(self::USER_CREATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
         }
 
-        $user = $this->userService->createUser($dto);
-        $responseDto = new UserResponseSuccessDTO($this->populateDTOFromEntity($user, UserDTO::class, ['get']));
+        /** @var UserDTO */
+        $userDTO = $this->populateService->populateDTOFromEntity($this->userService->createUser($dto), UserDTO::class, ['get']);
+        $responseDto = new UserResponseSuccessDTO($userDTO);
         return $this->responseService->createSuccessResponse($responseDto, self::USER_CREATE_SUCCESS);
     }
 
@@ -67,33 +65,14 @@ final class UserRequestHandler
         return $dto;
     }
 
-    /**
-     * @param User $entity
-     * @param string $type
-     * @param string[] $groups
-     * @return UserDTO
-     */
-    private function populateDTOFromEntity(User $entity, string $type, array $groups): UserDTO
-    {
-        /** @var UserDTO $dto */
-        $dto = $this->serializer->deserialize(
-            $this->serializer->serialize($entity, 'json'),
-            $type,
-            'json',
-            [AbstractNormalizer::GROUPS => $groups]
-        );
-
-        return $dto;
-    }
-
     public function getUser(int $id): JsonResponse
     {
         return $this->responseService->createSuccessResponse(
             new UserResponseSuccessDTO(
-                $this->populateDTOFromEntity(
+                $this->populateService->populateDTOFromEntity(
                     $this->userService->getUser($id),
                     UserDTO::class,
-                    ['get']
+                    ['get', 'user', 'application_link', 'application']
                 )
             )
         );
@@ -103,7 +82,7 @@ final class UserRequestHandler
     public function updateUser(int $id, Request $request): JsonResponse
     {
         $userDto = $this->deserializeUserDTO($request);
-        $validationErrors = $this->validationService->validateUserDTO($userDto);
+        $validationErrors = $this->validationService->validateDTO($userDto);
         if (count($validationErrors) > 0) {
             throw new ApiException(self::USER_UPDATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
         }
@@ -113,7 +92,7 @@ final class UserRequestHandler
 
         return $this->responseService->createSuccessResponse(
             new UserResponseSuccessDTO(
-                $this->populateDTOFromEntity(
+                $this->populateService->populateDTOFromEntity(
                     $user,
                     UserDTO::class,
                     ['get']

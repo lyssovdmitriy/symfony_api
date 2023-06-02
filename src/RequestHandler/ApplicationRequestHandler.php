@@ -1,0 +1,76 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\RequestHandler;
+
+use App\DTO\Application\ApplicationDTO;
+use App\DTO\BaseResponse\BaseResponseSuccessDataDTO;
+use App\Entity\Application;
+use App\Entity\User;
+use App\Exception\ApiException;
+use App\Service\ApplicationService;
+use App\Service\PopulateService;
+use App\Service\ResponseService;
+use App\Service\ValidationService;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
+
+class ApplicationRequestHandler
+{
+
+    const APPLICATION_CREATE_SUCCESS = Response::HTTP_CREATED;
+    const APPLICATION_CREATE_ERROR = Response::HTTP_BAD_REQUEST;
+    const APPLICATION_CREATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
+    const APPLICATION_CREATE_CONFLICT_ERROR = Response::HTTP_CONFLICT;
+    const APPLICATION_GET_SUCCESS = Response::HTTP_OK;
+    const APPLICATION_NOT_FOUND = Response::HTTP_NOT_FOUND;
+    const APPLICATION_UPDATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
+
+
+    public function __construct(
+        private SerializerInterface $serializer,
+        private ValidationService $validationService,
+        private ApplicationService $applicationService,
+        private ResponseService $responseService,
+        private PopulateService $populateService,
+    ) {
+    }
+
+    public function createApplication(Request $request, User $user): JsonResponse
+    {
+        $dto = $this->deserializeApplicationDTO($request);
+
+        $validationErrors = $this->validationService->validateDTO($dto);
+
+        if (count($validationErrors) > 0) {
+            throw new ApiException(self::APPLICATION_CREATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
+        }
+
+        $application = $this->applicationService->createApplication($dto, $user);
+        $dto = $this->populateService->populateDTOFromEntity($application, ApplicationDTO::class, ['get', 'application']);
+        $responseDto = new BaseResponseSuccessDataDTO((array)$dto);
+        return $this->responseService->createSuccessResponse($responseDto, self::APPLICATION_CREATE_SUCCESS);
+    }
+
+    public function getApplication(int $id): JsonResponse
+    {
+        $application = $this->applicationService->getApplicationById($id);
+        $dto = $this->populateService->populateDTOFromEntity($application, ApplicationDTO::class, ['application', 'get']);
+        $responseDto = new BaseResponseSuccessDataDTO((array)$dto);
+        return $this->responseService->createSuccessResponse($responseDto);
+    }
+
+    private function deserializeApplicationDTO(Request $request): ApplicationDTO
+    {
+        try {
+            $dto = $this->serializer->deserialize($request->getContent(), ApplicationDTO::class, 'json');
+        } catch (\Throwable $th) {
+            throw new ApiException(self::APPLICATION_CREATE_ERROR, $th->getMessage(), ['JSON parsing error: Invalid JSON syntax'], $th);
+        }
+        return $dto;
+    }
+}

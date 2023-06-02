@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\DTO\User;
 
+use App\DTO\Application\ApplicationDTO;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\Items;
 
 final class UserDTO
 {
@@ -41,4 +44,11 @@ final class UserDTO
     #[Assert\NotBlank(message: 'The address value should not be blank.', groups: ['create'])]
     #[Groups(['get', 'create', 'update'])]
     public string $address;
+
+    /**
+     * @var ApplicationDTO[]
+     */
+    #[OA\Property(type: 'array', items: new Items(ref: new Model(type: ApplicationDTO::class)))]
+    #[Groups(['get'])]
+    public array $applications;
 }
