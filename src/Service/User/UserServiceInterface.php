@@ -14,7 +14,7 @@ interface UserServiceInterface
 
     public function getUser(int $id): UserDTO;
 
-    public function updateUser(int $id, UserDTO $userDTO): UserDTO;
+    public function updateUser(int $id, UserDTO $userDTO): void;
 
     public function deleteUser(int $id): void;
 

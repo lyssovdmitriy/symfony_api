@@ -83,10 +83,10 @@ final class UserRequestHandler
             throw new ApiException(self::USER_UPDATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
         }
 
-        $userDTO = $this->userService->updateUser($id, $userDto);
+        $this->userService->updateUser($id, $userDto);
 
         return $this->responseService->createSuccessResponse(
-            new UserResponseSuccessDTO($userDTO)
+            new BaseResponseSuccessDTO
         );
     }
 

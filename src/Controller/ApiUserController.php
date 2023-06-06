@@ -109,7 +109,7 @@ class ApiUserController extends AbstractController
     #[OA\Response(
         response: UserRequestHandler::USER_GET_SUCCESS,
         description: 'Successful response',
-        content: new Model(type: UserResponseSuccessDTO::class, groups: ['update'])
+        content: new Model(type: BaseResponseSuccessDTO::class)
     )]
 
     #[OA\Response(

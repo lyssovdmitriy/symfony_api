@@ -4,7 +4,6 @@ namespace App\Tests\Service;
 
 use App\DTO\User\UserDTO;
 use App\Entity\User;
-use App\Exception\NotFountException;
 use App\Exception\UserCreateConflictException;
 use App\Repository\UserRepository;
 use App\Service\PopulateService;
@@ -164,14 +163,7 @@ class UserServiceTest extends TestCase
             ->method('setPassword')
             ->with($hashedPassword);
 
-        $this->populateService->expects($this->once())
-            ->method('populateDTOFromEntity')
-            ->with($user, UserDTO::class, ['get', 'user'])
-            ->willReturn($dto);
-
-
-        $userDto = $this->userService->updateUser(1, $dto);
-        $this->assertInstanceOf(UserDTO::class, $userDto);
+        $this->userService->updateUser(1, $dto);
     }
 
     public function testUpdateUserNull(): void
@@ -195,7 +187,7 @@ class UserServiceTest extends TestCase
 
         $this->userRepository->expects($this->once())
             ->method('remove')
-            ->with($user);
+            ->with($user, true);
 
         $this->userService->deleteUser(1);
     }

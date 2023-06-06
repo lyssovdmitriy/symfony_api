@@ -57,7 +57,7 @@ class UserService implements UserServiceInterface
         return $userDto;
     }
 
-    public function updateUser(int $id, UserDTO $userDTO): UserDTO
+    public function updateUser(int $id, UserDTO $userDTO): void
     {
 
         $user = $this->userRepository->findOneBy(['id' => $id]) ?? throw new UserNotFoundException("User $id not found", 404);
@@ -74,22 +74,13 @@ class UserService implements UserServiceInterface
         }
 
         $this->userRepository->save($user, true);
-
-        /** @var UserDTO */
-        $userDTO = $this->populateService->populateDTOFromEntity(
-            $user,
-            UserDTO::class,
-            ['get', 'user']
-        );
-
-        return $userDTO;
     }
 
 
     public function deleteUser(int $id): void
     {
         $user = $this->userRepository->findOneBy(['id' => $id]) ?? throw new UserNotFoundException("User $id not found", 404);
-        $this->userRepository->remove($user);
+        $this->userRepository->remove($user, true);
     }
 
 

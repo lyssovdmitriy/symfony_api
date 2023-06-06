@@ -10,7 +10,6 @@ use App\Repository\ApplicationRepository;
 use App\Repository\UserRepository;
 use App\Service\Application\ApplicationService;
 use App\Service\PopulateService;
-use DG\BypassFinals;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -40,7 +39,6 @@ class ApplicationServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        BypassFinals::enable();
         $this->userRepository = $this->createMock(UserRepository::class);
         $this->applicationRepository = $this->createMock(ApplicationRepository::class);
         $this->populateService = $this->createMock(PopulateService::class);
