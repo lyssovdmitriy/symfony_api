@@ -13,7 +13,7 @@ PHPSTAN      = $(PHP) vendor/bin/phpstan
 
 # Misc
 .DEFAULT_GOAL = help
-.PHONY        : help build up start down logs sh composer vendor sf cc composer-install create-database load-fixtires test coverage-report run-project
+.PHONY        : help build up start down logs sh composer vendor sf cc composer-install create-database load-fixtires test coverage-report run-project generate-keypair
 
 ## —— 🎵 🐳 The Symfony Docker Makefile 🐳 🎵 ——————————————————————————————————
 help: ## Outputs this help screen
@@ -64,6 +64,9 @@ create-database: ## Create the database
 load-fixtures: ## Load fixtures
 	@$(SYMFONY) doctrine:fixtures:load --no-interaction
 
+generate-keypair: ## Generate JWT key pair
+	@$(SYMFONY) lexik:jwt:generate-keypair
+
 ## —— Tests 🧪 ————————————————————————————————————————————————————————————————
 test: ## Run PHPUnit tests and PHPStan analysis
 	@$(PHPUNIT)
@@ -76,4 +79,4 @@ coverage-report: ## Generate PHPUnit code coverage report
 
 
 ## —— Run Project 🚀 ———————————————————————————————————————————————————————————————
-run-project: start composer-install create-database load-fixtures ## Setup and run
+run-project: start composer-install generate-keypair create-database load-fixtures ## Setup and run
