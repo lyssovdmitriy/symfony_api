@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\RequestHandler;
 
+use App\DTO\BaseResponse\BaseResponseSuccessDataDTO;
 use App\DTO\BaseResponse\BaseResponseSuccessDTO;
 use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
-use App\Entity\User;
 use App\Exception\ApiException;
 use App\Service\PopulateService;
 use App\Service\ResponseService;
-use App\Service\UserService;
+use App\Service\User\UserServiceInterface;
 use App\Service\ValidationService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 final class UserRequestHandler
@@ -34,9 +33,8 @@ final class UserRequestHandler
     public function __construct(
         private SerializerInterface $serializer,
         private ValidationService $validationService,
-        private UserService $userService,
+        private UserServiceInterface $userService,
         private ResponseService $responseService,
-        private PopulateService $populateService,
     ) {
     }
 
@@ -49,10 +47,12 @@ final class UserRequestHandler
             throw new ApiException(self::USER_CREATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
         }
 
-        /** @var UserDTO */
-        $userDTO = $this->populateService->populateDTOFromEntity($this->userService->createUser($dto), UserDTO::class, ['get']);
-        $responseDto = new UserResponseSuccessDTO($userDTO);
-        return $this->responseService->createSuccessResponse($responseDto, self::USER_CREATE_SUCCESS);
+        return $this->responseService->createSuccessResponse(
+            new UserResponseSuccessDTO(
+                $this->userService->createUser($dto)
+            ),
+            self::USER_CREATE_SUCCESS
+        );
     }
 
     private function deserializeUserDTO(Request $request): UserDTO
@@ -69,11 +69,7 @@ final class UserRequestHandler
     {
         return $this->responseService->createSuccessResponse(
             new UserResponseSuccessDTO(
-                $this->populateService->populateDTOFromEntity(
-                    $this->userService->getUser($id),
-                    UserDTO::class,
-                    ['get', 'user', 'application_link', 'application']
-                )
+                $this->userService->getUser($id)
             )
         );
     }
@@ -86,18 +82,11 @@ final class UserRequestHandler
         if (count($validationErrors) > 0) {
             throw new ApiException(self::USER_UPDATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
         }
-        $user = $this->userService->getUser($id);
 
-        $this->userService->updateUser($user, $userDto);
+        $userDTO = $this->userService->updateUser($id, $userDto);
 
         return $this->responseService->createSuccessResponse(
-            new UserResponseSuccessDTO(
-                $this->populateService->populateDTOFromEntity(
-                    $user,
-                    UserDTO::class,
-                    ['get']
-                )
-            )
+            new UserResponseSuccessDTO($userDTO)
         );
     }
 
@@ -106,5 +95,16 @@ final class UserRequestHandler
     {
         $this->userService->deleteUser($id);
         return $this->responseService->createSuccessResponse(new BaseResponseSuccessDTO());
+    }
+
+
+    public function getUsers(int $offset, int $limit): JsonResponse
+    {
+        $offset = $offset < 0 ? 0 : $offset;
+        $limit = $limit < 0 ? 10 : $limit;
+
+        $users = $this->userService->getUsers($offset, $limit);
+
+        return $this->responseService->createSuccessResponse(new BaseResponseSuccessDataDTO($users));
     }
 }

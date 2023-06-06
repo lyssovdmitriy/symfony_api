@@ -22,3 +22,6 @@
 /phpunit.xml
 .phpunit.result.cache
 ###< phpunit/phpunit ###
+
+/public/uploads/
+/coverage-report/

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTO\User;
 
 use App\DTO\Application\ApplicationDTO;
+use DateTime;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -15,7 +16,7 @@ final class UserDTO
 {
 
     #[OA\Property(example: '123')]
-    #[Groups(['get'])]
+    #[Groups(['get', 'id'])]
     public int $id;
 
     #[OA\Property(example: 'vasya@pupkin.org')]
@@ -51,4 +52,10 @@ final class UserDTO
     #[OA\Property(type: 'array', items: new Items(ref: new Model(type: ApplicationDTO::class)))]
     #[Groups(['get'])]
     public array $applications;
+
+
+    public function setBirthday(DateTime $date): void
+    {
+        $this->birthday = $date->format('Y-m-d');
+    }
 }

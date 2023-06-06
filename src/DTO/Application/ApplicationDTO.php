@@ -34,5 +34,5 @@ final class ApplicationDTO
 
     #[Groups(['get'])]
     #[OA\Property(type: 'string', example: 'applications/1/file')]
-    public string $fileLink;
+    public ?string $file;
 }

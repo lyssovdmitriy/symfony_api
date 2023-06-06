@@ -53,6 +53,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Groups(['application_link'])]
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Application::class, orphanRemoval: true)]
+    /** @phpstan-ignore-next-line */
     private Collection $applications;
 
     public function __construct()

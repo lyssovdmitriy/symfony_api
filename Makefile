@@ -57,4 +57,9 @@ cc: sf
 ## —— Tests 🧪 ————————————————————————————————————————————————————————————————
 test: ## Run PHPUnit tests and PHPStan analysis
 	@$(PHPUNIT)
-	@$(PHPSTAN) analyse src
+	@$(PHPSTAN) analyse src --memory-limit 1G
+
+coverage-report: ## Generate PHPUnit code coverage report
+	@$(DOCKER_COMP) run --rm -e XDEBUG_MODE=coverage php bin/phpunit --coverage-html coverage-report
+	@echo "Code coverage report generated. You can view it by opening the following file:"
+	@echo "file://$(CURDIR)/coverage-report/index.html"

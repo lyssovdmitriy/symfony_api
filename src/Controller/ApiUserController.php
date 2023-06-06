@@ -10,6 +10,7 @@ use OpenApi\Attributes as OA;
 use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\RequestHandler\UserRequestHandler;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,6 +41,7 @@ class ApiUserController extends AbstractController
     #[Route('/api/users', methods: ['POST'])]
     #[OA\Post(
         path: '/api/users',
+        summary: 'Create User',
         requestBody: new OA\RequestBody(content: new OA\JsonContent(ref: new Model(type: UserDTO::class, groups: ['create']))),
         description: 'Creating a new user'
     )]
@@ -71,6 +73,10 @@ class ApiUserController extends AbstractController
 
 
     #[Route('/api/users/{id}', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/users/{id}',
+        summary: 'Get User',
+    )]
     #[OA\Response(
         response: UserRequestHandler::USER_GET_SUCCESS,
         description: 'Successful response',
@@ -98,7 +104,7 @@ class ApiUserController extends AbstractController
     #[OA\Put(
         path: '/api/users/{id}',
         requestBody: new OA\RequestBody(content: new OA\JsonContent(ref: new Model(type: UserDTO::class, groups: ['update']))),
-        description: 'Creating a new user'
+        summary: 'Update User'
     )]
     #[OA\Response(
         response: UserRequestHandler::USER_GET_SUCCESS,
@@ -125,6 +131,10 @@ class ApiUserController extends AbstractController
 
 
     #[Route('/api/users/{id}', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: '/api/users/{id}',
+        summary: 'Delete User'
+    )]
     #[OA\Response(
         response: Response::HTTP_OK,
         description: 'Successful response',
@@ -145,6 +155,27 @@ class ApiUserController extends AbstractController
     {
         $this->checkAuthForUserAction($id);
         return $this->userRequestHandler->deleteUser($id);
+    }
+
+
+    #[Route('/api/users', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/users',
+        summary: 'Get User list',
+    )]
+    public function getUsers(Request $request): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        /** @var User */
+        $user = $this->getUser();
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            throw new AccessDeniedHttpException('Access denied.');
+        }
+
+        return $this->userRequestHandler->getUsers(
+            $request->query->getInt('offset', 0),
+            $request->query->getInt('limit', 10)
+        );
     }
 
 

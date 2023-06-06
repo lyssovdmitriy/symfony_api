@@ -5,19 +5,22 @@ declare(strict_types=1);
 namespace App\RequestHandler;
 
 use App\DTO\Application\ApplicationDTO;
+use App\DTO\Application\ApplicationResponseSuccessDTO;
 use App\DTO\BaseResponse\BaseResponseSuccessDataDTO;
-use App\Entity\Application;
+use App\DTO\BaseResponse\BaseResponseSuccessDTO;
 use App\Entity\User;
 use App\Exception\ApiException;
-use App\Service\ApplicationService;
+use App\Service\Application\ApplicationServiceInterface;
 use App\Service\PopulateService;
 use App\Service\ResponseService;
 use App\Service\ValidationService;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Throwable;
 
 class ApplicationRequestHandler
 {
@@ -34,13 +37,12 @@ class ApplicationRequestHandler
     public function __construct(
         private SerializerInterface $serializer,
         private ValidationService $validationService,
-        private ApplicationService $applicationService,
+        private ApplicationServiceInterface $applicationService,
         private ResponseService $responseService,
-        private PopulateService $populateService,
     ) {
     }
 
-    public function createApplication(Request $request, User $user): JsonResponse
+    public function createApplication(Request $request, int $userId): JsonResponse
     {
         $dto = $this->deserializeApplicationDTO($request);
 
@@ -50,18 +52,20 @@ class ApplicationRequestHandler
             throw new ApiException(self::APPLICATION_CREATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
         }
 
-        $application = $this->applicationService->createApplication($dto, $user);
-        $dto = $this->populateService->populateDTOFromEntity($application, ApplicationDTO::class, ['get', 'application']);
-        $responseDto = new BaseResponseSuccessDataDTO((array)$dto);
-        return $this->responseService->createSuccessResponse($responseDto, self::APPLICATION_CREATE_SUCCESS);
+        $applicationDTO = $this->applicationService->createApplication($dto, $userId);
+        $responseDTO = new ApplicationResponseSuccessDTO($applicationDTO);
+        return $this->responseService->createSuccessResponse($responseDTO, self::APPLICATION_CREATE_SUCCESS);
     }
 
     public function getApplication(int $id): JsonResponse
     {
-        $application = $this->applicationService->getApplicationById($id);
-        $dto = $this->populateService->populateDTOFromEntity($application, ApplicationDTO::class, ['application', 'get']);
-        $responseDto = new BaseResponseSuccessDataDTO((array)$dto);
-        return $this->responseService->createSuccessResponse($responseDto);
+        $applicationDTO = $this->applicationService->getApplicationById($id);
+        if (isset($applicationDTO->file)) {
+            $applicationDTO->file = "applications/{$applicationDTO->id}/file";
+        }
+        $responseDTO = new ApplicationResponseSuccessDTO($applicationDTO);
+
+        return $this->responseService->createSuccessResponse($responseDTO);
     }
 
     private function deserializeApplicationDTO(Request $request): ApplicationDTO
@@ -72,5 +76,26 @@ class ApplicationRequestHandler
             throw new ApiException(self::APPLICATION_CREATE_ERROR, $th->getMessage(), ['JSON parsing error: Invalid JSON syntax'], $th);
         }
         return $dto;
+    }
+
+    public function attachFile(Request $request, int $applicationId): JsonResponse
+    {
+        $file = $request->files->get('file');
+        if (!$file instanceof UploadedFile) {
+            throw new ApiException(self::APPLICATION_CREATE_VALIDATION_ERROR, 'File is required');
+        }
+
+        try {
+            $this->applicationService->attachFile($file, $applicationId);
+        } catch (Throwable $e) {
+            throw new ApiException(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to upload file.', [$e->getMessage()], $e);
+        }
+
+        return $this->responseService->createSuccessResponse(new BaseResponseSuccessDTO);
+    }
+
+    public function getFileByApplicationId(int $id): StreamedResponse
+    {
+        return $this->applicationService->getFile($id);
     }
 }
