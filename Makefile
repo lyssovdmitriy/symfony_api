@@ -13,7 +13,7 @@ PHPSTAN      = $(PHP) vendor/bin/phpstan
 
 # Misc
 .DEFAULT_GOAL = help
-.PHONY        : help build up start down logs sh composer vendor sf cc
+.PHONY        : help build up start down logs sh composer vendor sf cc composer-install create-database load-fixtires test coverage-report run-project
 
 ## —— 🎵 🐳 The Symfony Docker Makefile 🐳 🎵 ——————————————————————————————————
 help: ## Outputs this help screen
@@ -42,6 +42,9 @@ composer: ## Run composer, pass the parameter "c=" to run a given command, examp
 	@$(eval c ?=)
 	@$(COMPOSER) $(c)
 
+composer-install: ## Install project dependencies using Composer
+	@$(COMPOSER) install
+
 vendor: ## Install vendors according to the current composer.lock file
 vendor: c=install --prefer-dist --no-dev --no-progress --no-scripts --no-interaction
 vendor: composer
@@ -54,6 +57,13 @@ sf: ## List all Symfony commands or pass the parameter "c=" to run a given comma
 cc: c=c:c ## Clear the cache
 cc: sf
 
+create-database: ## Create the database
+	@$(SYMFONY) doctrine:database:create
+	@$(SYMFONY) doctrine:database:create --env=test
+
+load-fixtures: ## Load fixtures
+	@$(SYMFONY) doctrine:fixtures:load --no-interaction
+
 ## —— Tests 🧪 ————————————————————————————————————————————————————————————————
 test: ## Run PHPUnit tests and PHPStan analysis
 	@$(PHPUNIT)
@@ -63,3 +73,7 @@ coverage-report: ## Generate PHPUnit code coverage report
 	@$(DOCKER_COMP) run --rm -e XDEBUG_MODE=coverage php bin/phpunit --coverage-html coverage-report
 	@echo "Code coverage report generated. You can view it by opening the following file:"
 	@echo "file://$(CURDIR)/coverage-report/index.html"
+
+
+## —— Run Project 🚀 ———————————————————————————————————————————————————————————————
+run-project: start composer-install create-database load-fixtures ## Setup and run

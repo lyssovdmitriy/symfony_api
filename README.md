@@ -1,46 +1,34 @@
-# Symfony Docker
+# REST API проект
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework, with full [HTTP/2](https://symfony.com/doc/current/weblink.html), HTTP/3 and HTTPS support.
+Этот проект является выполнением тестового задания и представляет собой REST API.
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+## Ссылка на задание
 
-## Getting Started
+Для подробной информации о задании, перейдите по [ссылке](https://southern-cadet-3df.notion.site/PHP-developer-f1f95c6f0d084e1abd02e57a99ce86da).
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --pull --no-cache` to build fresh images
-3. Run `docker compose up` (the logs will be displayed in the current shell)
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
+## Запуск проекта
 
-## Features
+Для запуска проекта вам потребуется Docker последней версии. Выполните следующие шаги:
 
-* Production, development and CI ready
-* [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-* Automatic HTTPS (in dev and in prod!)
-* HTTP/2, HTTP/3 and [Preload](https://symfony.com/doc/current/web_link.html) support
-* Built-in [Mercure](https://symfony.com/doc/current/mercure.html) hub
-* [Vulcain](https://vulcain.rocks) support
-* Native [XDebug](docs/xdebug.md) integration
-* Just 2 services (PHP FPM and Caddy server)
-* Super-readable configuration
+1. Установите Docker, если у вас его еще нет.
+2. Откройте командную строку или терминал.
+3. Перейдите в корневую папку проекта.
+4. Выполните команду `make run-project`.
+5. Подождите, пока зависимости будут установлены и проект будет запущен.
 
-**Enjoy!**
+После успешного запуска проект будет доступен по ссылке [https://localhost/api/doc](https://localhost/api/doc), где вы сможете найти документацию Swagger API.
 
-## Docs
+Также, JSON-документация доступна по ссылке [https://localhost/api/doc.json](https://localhost/api/doc.json).
 
-1. [Build options](docs/build.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Debugging with Xdebug](docs/xdebug.md)
-6. [TLS Certificates](docs/tls.md)
-7. [Using a Makefile](docs/makefile.md)
-8. [Troubleshooting](docs/troubleshooting.md)
+## Тестовые пользователи
 
-## License
+В проекте уже предустановлены два тестовых пользователя:
 
-Symfony Docker is available under the MIT License.
+-   `admin` с паролем `admin`
+-   `user` с паролем `user`
 
-## Credits
+Вы можете использовать эти данные для тестирования запросов в интерфейсе Swagger.
 
-Created by [Kévin Dunglas](https://dunglas.fr), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
+## Документация по Docker
+
+Если у вас возникнут какие-либо проблемы, вы можете обратиться к документации репозитория [https://github.com/dunglas/symfony-docker](https://github.com/dunglas/symfony-docker), где содержатся настройки Docker для этого проекта.
