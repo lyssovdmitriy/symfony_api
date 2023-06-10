@@ -50,7 +50,7 @@ final class UserRequestHandler
         );
     }
 
-    private function validateDTO(mixed $dto, int $errorCode = Response::HTTP_BAD_REQUEST)
+    private function validateDTO(object $dto, int $errorCode = Response::HTTP_BAD_REQUEST): void
     {
         $validationErrors = $this->validationService->validateDTO($dto);
         if (count($validationErrors) > 0) {
