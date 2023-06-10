@@ -9,7 +9,6 @@ use App\DTO\BaseResponse\BaseResponseSuccessDTO;
 use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
 use App\Exception\ApiException;
-use App\Service\PopulateService;
 use App\Service\ResponseService;
 use App\Service\User\UserServiceInterface;
 use App\Service\ValidationService;
@@ -41,11 +40,7 @@ final class UserRequestHandler
     public function createUser(Request $request): JsonResponse
     {
         $dto = $this->deserializeUserDTO($request);
-        $validationErrors = $this->validationService->validateDTO($dto);
-
-        if (count($validationErrors) > 0) {
-            throw new ApiException(self::USER_CREATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
-        }
+        $this->validateDTO($dto, self::USER_CREATE_VALIDATION_ERROR);
 
         return $this->responseService->createSuccessResponse(
             new UserResponseSuccessDTO(
@@ -53,6 +48,14 @@ final class UserRequestHandler
             ),
             self::USER_CREATE_SUCCESS
         );
+    }
+
+    private function validateDTO(mixed $dto, int $errorCode = Response::HTTP_BAD_REQUEST)
+    {
+        $validationErrors = $this->validationService->validateDTO($dto);
+        if (count($validationErrors) > 0) {
+            throw new ApiException($errorCode, 'Validation failed', $validationErrors);
+        }
     }
 
     private function deserializeUserDTO(Request $request): UserDTO
@@ -78,11 +81,7 @@ final class UserRequestHandler
     public function updateUser(int $id, Request $request): JsonResponse
     {
         $userDto = $this->deserializeUserDTO($request);
-        $validationErrors = $this->validationService->validateDTO($userDto);
-        if (count($validationErrors) > 0) {
-            throw new ApiException(self::USER_UPDATE_VALIDATION_ERROR, 'Validation failed', $validationErrors);
-        }
-
+        $this->validateDTO($userDto, self::USER_UPDATE_VALIDATION_ERROR);
         $this->userService->updateUser($id, $userDto);
 
         return $this->responseService->createSuccessResponse(
