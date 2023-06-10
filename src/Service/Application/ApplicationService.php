@@ -62,6 +62,7 @@ class ApplicationService implements ApplicationServiceInterface
     }
 
 
+    /** @throws \Vich\UploaderBundle\Exception\MappingNotFoundException */
     public function attachFile(UploadedFile $uploadedFile, int $applicationId): void
     {
         $application = $this->applicationRepository->findOneBy(['id' => $applicationId]) ?? throw new NotFountException("Application $applicationId not found");
@@ -72,6 +73,7 @@ class ApplicationService implements ApplicationServiceInterface
         $this->applicationRepository->save($application, true);
     }
 
+    /** @throws \App\Exception\NotFountException */
     public function getFile(int $applicationId): StreamedResponse
     {
         $application = $this->applicationRepository->findOneBy(['id' => $applicationId]) ?? throw new NotFountException("Application $applicationId not found");

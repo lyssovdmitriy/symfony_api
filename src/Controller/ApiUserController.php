@@ -46,22 +46,22 @@ class ApiUserController extends AbstractController
         description: 'Creating a new user'
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_CREATE_SUCCESS,
+        response: Response::HTTP_CREATED,
         description: 'Successful response',
         content: new Model(type: UserResponseSuccessDTO::class, groups: ['get'])
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_CREATE_ERROR,
+        response: Response::HTTP_BAD_REQUEST,
         description: 'Invalid request',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_CREATE_VALIDATION_ERROR,
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
         description: 'Invalid data',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_CREATE_CONFLICT_ERROR,
+        response: Response::HTTP_CONFLICT,
         description: 'User already exists.',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
@@ -78,7 +78,7 @@ class ApiUserController extends AbstractController
         summary: 'Get User',
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_GET_SUCCESS,
+        response: Response::HTTP_OK,
         description: 'Successful response',
         content: new Model(type: UserResponseSuccessDTO::class, groups: ['get'])
     )]
@@ -89,7 +89,7 @@ class ApiUserController extends AbstractController
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_NOT_FOUND,
+        response: Response::HTTP_NOT_FOUND,
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
@@ -107,7 +107,7 @@ class ApiUserController extends AbstractController
         summary: 'Update User'
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_GET_SUCCESS,
+        response: Response::HTTP_OK,
         description: 'Successful response',
         content: new Model(type: BaseResponseSuccessDTO::class)
     )]
@@ -118,7 +118,7 @@ class ApiUserController extends AbstractController
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_NOT_FOUND,
+        response: Response::HTTP_NOT_FOUND,
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
@@ -147,7 +147,7 @@ class ApiUserController extends AbstractController
         content: new Model(type: BaseResponseErrorDTO::class)
     )]
     #[OA\Response(
-        response: UserRequestHandler::USER_NOT_FOUND,
+        response: Response::HTTP_NOT_FOUND,
         description: 'User not found',
         content: new Model(type: BaseResponseErrorDTO::class)
     )]

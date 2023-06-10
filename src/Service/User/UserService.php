@@ -33,35 +33,40 @@ class UserService implements UserServiceInterface
         $user->setBirthday(new DateTimeImmutable($dto->birthday));
         $user->setPhone($dto->phone);
 
+        $this->tryToSaveNewUser($user);
+
+        return $this->populateService->populateDTOFromEntity($user, UserDTO::class, ['user', 'create', 'id']);
+    }
+
+    /** @throws \App\Exception\UserCreateConflictException */
+    private function tryToSaveNewUser(User $user): void
+    {
         try {
             $this->userRepository->save($user, true);
         } catch (UniqueConstraintViolationException $exception) {
             throw new UserCreateConflictException('User already exists.', previous: $exception);
         }
-
-        /** @var UserDTO */
-        $userDTO = $this->populateService->populateDTOFromEntity($user, UserDTO::class, ['user', 'create', 'id']);
-        return $userDTO;
     }
 
-
+    /** @throws \Symfony\Component\Security\Core\Exception\UserNotFoundException */
     public function getUser(int $id): UserDTO
     {
         $user = $this->userRepository->findOneBy(['id' => $id]);
         if (null === $user) {
             throw new UserNotFoundException('User not found');
         }
-
-        /** @var UserDTO */
-        $userDto = $this->populateService->populateDTOFromEntity($user, UserDTO::class, ['user', 'get', 'application_link', 'application']);
-        return $userDto;
+        return $this->populateService->populateDTOFromEntity($user, UserDTO::class, ['user', 'get', 'application_link', 'application']);
     }
 
     public function updateUser(int $id, UserDTO $userDTO): void
     {
-
         $user = $this->userRepository->findOneBy(['id' => $id]) ?? throw new UserNotFoundException("User $id not found", 404);
+        $this->changeUserData($user, $userDTO);
+        $this->userRepository->save($user, true);
+    }
 
+    private function changeUserData(User $user, UserDTO $userDTO): void
+    {
         $changer = [
             'address' => fn () => $user->setAddress($userDTO->address),
             'birthday' => fn () => $user->setBirthday(new DateTimeImmutable($userDTO->birthday)),
@@ -72,11 +77,10 @@ class UserService implements UserServiceInterface
         foreach ($changer as $field => $func) {
             in_array($field, array_keys((array)$userDTO), true) ? $func() : null;
         }
-
-        $this->userRepository->save($user, true);
     }
 
 
+    /** @throws \Symfony\Component\Security\Core\Exception\UserNotFoundException */
     public function deleteUser(int $id): void
     {
         $user = $this->userRepository->findOneBy(['id' => $id]) ?? throw new UserNotFoundException("User $id not found", 404);
@@ -87,13 +91,11 @@ class UserService implements UserServiceInterface
     public function getUsers(int $offset, int $limit): array
     {
         $users = $this->userRepository->findBy([], ['id' => 'ASC'], $limit, $offset);
-        /** @var UserDTO[] */
         $dtos = [];
         foreach ($users as $user) {
             $dtos[] = $this->populateService->populateDTOFromEntity($user, UserDTO::class, ['get', 'user']);
         }
 
-        /** @var UserDTO[] */
         return $dtos;
     }
 }

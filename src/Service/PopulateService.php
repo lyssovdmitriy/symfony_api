@@ -17,10 +17,11 @@ class PopulateService
 
 
     /**
+     * @template T of object
      * @param object $entity
-     * @param string $type
+     * @param class-string<T> $type
      * @param string[] $groups
-     * @return object
+     * @return T
      */
     public function populateDTOFromEntity(object $entity, string $type, array $groups): object
     {

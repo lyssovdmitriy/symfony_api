@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 // TODO describe responses
@@ -43,7 +44,7 @@ class ApiApplicationController extends AbstractController
         summary: 'Get Application',
     )]
     #[OA\Response(
-        response: ApplicationRequestHandler::APPLICATION_GET_SUCCESS,
+        response: Response::HTTP_OK,
         description: 'Successful response',
         content: new Model(type: ApplicationDTO::class, groups: ['get'])
     )]

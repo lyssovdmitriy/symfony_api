@@ -17,17 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 
-final class UserRequestHandler
+final class UserRequestHandler extends AbstractRequestHandler
 {
-
-    const USER_CREATE_SUCCESS = Response::HTTP_CREATED;
-    const USER_CREATE_ERROR = Response::HTTP_BAD_REQUEST;
-    const USER_CREATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
-    const USER_CREATE_CONFLICT_ERROR = Response::HTTP_CONFLICT;
-    const USER_GET_SUCCESS = Response::HTTP_OK;
-    const USER_NOT_FOUND = Response::HTTP_NOT_FOUND;
-    const USER_UPDATE_VALIDATION_ERROR = Response::HTTP_UNPROCESSABLE_ENTITY;
-
 
     public function __construct(
         private SerializerInterface $serializer,
@@ -40,37 +31,35 @@ final class UserRequestHandler
     public function createUser(Request $request): JsonResponse
     {
         $dto = $this->deserializeUserDTO($request);
-        $this->validateDTO($dto, self::USER_CREATE_VALIDATION_ERROR);
+        $this->validateDTO($this->validationService, $dto, Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        return $this->responseService->createSuccessResponse(
+        return $this->createSuccessJsonResponse(
             new UserResponseSuccessDTO(
                 $this->userService->createUser($dto)
             ),
-            self::USER_CREATE_SUCCESS
+            Response::HTTP_CREATED
         );
     }
 
-    private function validateDTO(object $dto, int $errorCode = Response::HTTP_BAD_REQUEST): void
-    {
-        $validationErrors = $this->validationService->validateDTO($dto);
-        if (count($validationErrors) > 0) {
-            throw new ApiException($errorCode, 'Validation failed', $validationErrors);
-        }
-    }
 
     private function deserializeUserDTO(Request $request): UserDTO
     {
         try {
             $dto = $this->serializer->deserialize($request->getContent(), UserDTO::class, 'json');
         } catch (\Throwable $th) {
-            throw new ApiException(self::USER_CREATE_ERROR, $th->getMessage(), ['JSON parsing error: Invalid JSON syntax'], $th);
+            throw new ApiException(Response::HTTP_BAD_REQUEST, $th->getMessage(), ['JSON parsing error: Invalid JSON syntax'], $th);
         }
         return $dto;
     }
 
+    private function createSuccessJsonResponse(mixed $dto, int $statusCode = Response::HTTP_OK): JsonResponse
+    {
+        return $this->responseService->createSuccessResponse($dto, $statusCode);
+    }
+
     public function getUser(int $id): JsonResponse
     {
-        return $this->responseService->createSuccessResponse(
+        return $this->createSuccessJsonResponse(
             new UserResponseSuccessDTO(
                 $this->userService->getUser($id)
             )
@@ -81,10 +70,10 @@ final class UserRequestHandler
     public function updateUser(int $id, Request $request): JsonResponse
     {
         $userDto = $this->deserializeUserDTO($request);
-        $this->validateDTO($userDto, self::USER_UPDATE_VALIDATION_ERROR);
+        $this->validateDTO($this->validationService, $userDto, Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->userService->updateUser($id, $userDto);
 
-        return $this->responseService->createSuccessResponse(
+        return $this->createSuccessJsonResponse(
             new BaseResponseSuccessDTO
         );
     }
@@ -93,7 +82,7 @@ final class UserRequestHandler
     public function deleteUser(int $id): JsonResponse
     {
         $this->userService->deleteUser($id);
-        return $this->responseService->createSuccessResponse(new BaseResponseSuccessDTO());
+        return $this->createSuccessJsonResponse(new BaseResponseSuccessDTO());
     }
 
 
@@ -104,6 +93,6 @@ final class UserRequestHandler
 
         $users = $this->userService->getUsers($offset, $limit);
 
-        return $this->responseService->createSuccessResponse(new BaseResponseSuccessDataDTO($users));
+        return $this->createSuccessJsonResponse(new BaseResponseSuccessDataDTO($users));
     }
 }

@@ -39,22 +39,6 @@ class ApplicationRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @param integer $id
-     * @return Application|null
-     */
-    public function getApplicationById(int $id): ?Application
-    {
-        $application = $this->createQueryBuilder('a')
-            ->andWhere('a.id = :val')
-            ->setParameter('val', $id)
-            ->getQuery()
-            ->getOneOrNullResult();
-        if ($application instanceof Application) {
-            return $application;
-        }
-        return null;
-    }
 
     //    /**
     //     * @return Application[] Returns an array of Application objects

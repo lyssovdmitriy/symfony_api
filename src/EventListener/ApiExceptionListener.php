@@ -9,6 +9,7 @@ use App\Exception\UserCreateConflictException;
 use App\Exception\NotFountException;
 use App\RequestHandler\UserRequestHandler;
 use App\Service\ResponseService;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
@@ -33,11 +34,11 @@ final class ApiExceptionListener
         }
 
         if ($exception instanceof UserCreateConflictException) {
-            $event->setResponse($this->responseService->createErrorResponse(UserRequestHandler::USER_CREATE_CONFLICT_ERROR, $exception->getMessage(), [], $exception->getCode()));
+            $event->setResponse($this->responseService->createErrorResponse(Response::HTTP_CONFLICT, $exception->getMessage(), [], $exception->getCode()));
         }
 
         if ($exception instanceof NotFountException) {
-            $event->setResponse($this->responseService->createErrorResponse(UserRequestHandler::USER_NOT_FOUND, $exception->getMessage(), [], $exception->getCode()));
+            $event->setResponse($this->responseService->createErrorResponse(Response::HTTP_NOT_FOUND, $exception->getMessage(), [], $exception->getCode()));
         }
     }
 }

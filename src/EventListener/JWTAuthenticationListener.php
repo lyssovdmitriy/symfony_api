@@ -14,7 +14,6 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTFailureEventInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTInvalidEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
-use Symfony\Contracts\EventDispatcher\Event;
 
 class JWTAuthenticationListener
 {
