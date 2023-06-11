@@ -29,6 +29,11 @@ class UserServiceTest extends TestCase
     /** @var PopulateService&MockObject */
     private MockObject $populateService;
 
+    private UserDTO $userDTO;
+
+    /** @var User&MockObject */
+    private MockObject $user;
+
     protected function setUp(): void
     {
         $this->userRepository = $this->createMock(UserRepository::class);
@@ -40,21 +45,23 @@ class UserServiceTest extends TestCase
             $this->userRepository,
             $this->populateService,
         );
+
+        $this->userDTO = new UserDTO();
+        $this->userDTO->email = 'test@example.com';
+        $this->userDTO->password = 'password123';
+        $this->userDTO->address = '123 Main St';
+        $this->userDTO->birthday = '1990-01-01';
+        $this->userDTO->phone = '1234567890';
+
+        $this->user = $this->createMock(User::class);
     }
 
     public function testCreateUser(): void
     {
-        $dto = new UserDTO();
-        $dto->email = 'test@example.com';
-        $dto->password = 'password123';
-        $dto->address = '123 Main St';
-        $dto->birthday = '1990-01-01';
-        $dto->phone = '1234567890';
-
         $hashedPassword = 'hashed_password';
         $this->passwordHasher->expects($this->once())
             ->method('hashPassword')
-            ->with($this->isInstanceOf(User::class), $dto->password)
+            ->with($this->isInstanceOf(User::class), $this->userDTO->password)
             ->willReturn($hashedPassword);
 
         $this->userRepository->expects($this->once())
@@ -62,21 +69,14 @@ class UserServiceTest extends TestCase
 
         $this->populateService->expects($this->once())
             ->method('populateDTOFromEntity')
-            ->willReturn($dto);
+            ->willReturn($this->userDTO);
 
-        $user = $this->userService->createUser($dto);
+        $user = $this->userService->createUser($this->userDTO);
         $this->assertInstanceOf(UserDTO::class, $user);
     }
 
     public function testCreateUserThrowsApiExceptionOnUniqueConstraintViolation(): void
     {
-        $dto = new UserDTO();
-        $dto->email = 'test@example.com';
-        $dto->password = 'password123';
-        $dto->address = '123 Main St';
-        $dto->birthday = '1990-01-01';
-        $dto->phone = '1234567890';
-
         $driverException = $this->createMock(DBALDriverException::class);
         $exception = new UniqueConstraintViolationException($driverException, null);
 
@@ -86,27 +86,19 @@ class UserServiceTest extends TestCase
 
         $this->expectException(UserCreateConflictException::class);
         $this->expectExceptionMessage('User already exists.');
-        $this->userService->createUser($dto);
+        $this->userService->createUser($this->userDTO);
     }
 
     public function testGetUser(): void
     {
-        $user = $this->createMock(User::class);
-        $dto = new UserDTO();
-        $dto->email = 'test@example.com';
-        $dto->password = 'password123';
-        $dto->address = '123 Main St';
-        $dto->birthday = '1990-01-01';
-        $dto->phone = '1234567890';
-
         $this->userRepository->expects($this->once())
             ->method('findOneBy')
-            ->willReturn($user);
+            ->willReturn($this->user);
 
         $this->populateService->expects($this->once())
             ->method('populateDTOFromEntity')
-            ->with($user, UserDTO::class)
-            ->willReturn($dto);
+            ->with($this->user, UserDTO::class)
+            ->willReturn($this->userDTO);
 
         $userDto = $this->userService->getUser(1);
         $this->assertInstanceOf(UserDTO::class, $userDto);
@@ -125,45 +117,37 @@ class UserServiceTest extends TestCase
 
     public function testUpdateUser(): void
     {
-        $user = $this->createMock(User::class);
-
-        $dto = new UserDTO();
-        $dto->password = 'password123';
-        $dto->address = '123 Main St';
-        $dto->birthday = '1990-01-01';
-        $dto->phone = '1234567890';
-
         $hashedPassword = 'hashed_password';
         $this->passwordHasher->expects($this->once())
             ->method('hashPassword')
-            ->with($user, $dto->password)
+            ->with($this->user, $this->userDTO->password)
             ->willReturn($hashedPassword);
 
         $this->userRepository->expects($this->once())
             ->method('findOneBy')
-            ->willReturn($user);
+            ->willReturn($this->user);
 
         $this->userRepository->expects($this->once())
             ->method('save')
-            ->with($user, true);
+            ->with($this->user, true);
 
-        $user->expects($this->once())
+        $this->user->expects($this->once())
             ->method('setAddress')
-            ->with($dto->address);
+            ->with($this->userDTO->address);
 
-        $user->expects($this->once())
+        $this->user->expects($this->once())
             ->method('setBirthday')
-            ->with(new DateTimeImmutable($dto->birthday));
+            ->with(new DateTimeImmutable($this->userDTO->birthday));
 
-        $user->expects($this->once())
+        $this->user->expects($this->once())
             ->method('setPhone')
-            ->with($dto->phone);
+            ->with($this->userDTO->phone);
 
-        $user->expects($this->once())
+        $this->user->expects($this->once())
             ->method('setPassword')
             ->with($hashedPassword);
 
-        $this->userService->updateUser(1, $dto);
+        $this->userService->updateUser(1, $this->userDTO);
     }
 
     public function testUpdateUserNull(): void
@@ -179,15 +163,13 @@ class UserServiceTest extends TestCase
 
     public function testDeleteUser(): void
     {
-        $user = $this->createMock(User::class);
-
         $this->userRepository->expects($this->once())
             ->method('findOneBy')
-            ->willReturn($user);
+            ->willReturn($this->user);
 
         $this->userRepository->expects($this->once())
             ->method('remove')
-            ->with($user, true);
+            ->with($this->user, true);
 
         $this->userService->deleteUser(1);
     }
@@ -205,26 +187,16 @@ class UserServiceTest extends TestCase
 
     public function testGetUsers(): void
     {
-        $user = $this->createMock(User::class);
-
-        $dto = new UserDTO();
-        $dto->email = 'test@example.com';
-        $dto->password = 'password123';
-        $dto->address = '123 Main St';
-        $dto->birthday = '1990-01-01';
-        $dto->phone = '1234567890';
-
-
         $this->userRepository->expects($this->once())
             ->method('findBy')
-            ->willReturn([$user]);
+            ->willReturn([$this->user]);
 
         $this->populateService->expects($this->once())
             ->method('populateDTOFromEntity')
-            ->with($user, UserDTO::class, ['get', 'user'])
-            ->willReturn($dto);
+            ->with($this->user, UserDTO::class, ['get', 'user'])
+            ->willReturn($this->userDTO);
 
         $userList = $this->userService->getUsers(0, 1);
-        $this->assertEquals([$dto], $userList);
+        $this->assertEquals([$this->userDTO], $userList);
     }
 }
