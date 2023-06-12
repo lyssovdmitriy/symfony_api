@@ -17,7 +17,6 @@ final class ApplicationFileAttachmentService implements ApplicationFileAttachmen
     ) {
     }
 
-    /** @throws \Vich\UploaderBundle\Exception\MappingNotFoundException */
     public function attachFile(UploadedFile $uploadedFile, int $applicationId): void
     {
         $application = $this->applicationRepository->findOneBy(['id' => $applicationId]) ?? throw new NotFoundException("Application $applicationId not found");

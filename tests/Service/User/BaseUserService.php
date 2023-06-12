@@ -10,7 +10,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-abstract class BaseUserServiceTest extends TestCase
+abstract class BaseUserService extends TestCase
 {
     protected UserPasswordHasherInterface&MockObject $passwordHasher;
 

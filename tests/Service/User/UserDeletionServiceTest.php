@@ -5,7 +5,7 @@ namespace App\Tests\Service\User;
 use App\Exception\NotFoundException;
 use App\Service\User\UserDeletionService;
 
-class UserDeletionServiceTest extends BaseUserServiceTest
+class UserDeletionServiceTest extends BaseUserService
 {
 
     private UserDeletionService $userDeletionService;
@@ -32,7 +32,7 @@ class UserDeletionServiceTest extends BaseUserServiceTest
         $this->userDeletionService->deleteUser(1);
     }
 
-    public function testDeleteUserNull(): void
+    public function testDeleteUserThrowsNotFoundException(): void
     {
         $this->userRepository->expects($this->once())
             ->method('findOneBy')

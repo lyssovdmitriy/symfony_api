@@ -7,7 +7,7 @@ use App\Exception\NotFoundException;
 use App\Service\User\UserUpdateService;
 use DateTimeImmutable;
 
-class UserUpdateServiceTest extends BaseUserServiceTest
+class UserUpdateServiceTest extends BaseUserService
 {
 
     private UserUpdateService $userUpdateService;

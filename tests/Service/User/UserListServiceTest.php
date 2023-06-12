@@ -6,7 +6,7 @@ use App\DTO\User\UserDTO;
 use App\Exception\NotFoundException;
 use App\Service\User\UserListService;
 
-class UserListServiceTest extends BaseUserServiceTest
+class UserListServiceTest extends BaseUserService
 {
 
     private UserListService $userListService;

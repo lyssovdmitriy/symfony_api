@@ -6,7 +6,7 @@ use App\DTO\User\UserDTO;
 use App\Exception\NotFoundException;
 use App\Service\User\UserRetrievalService;
 
-class UserRetrievalServiceTest extends BaseUserServiceTest
+class UserRetrievalServiceTest extends BaseUserService
 {
 
     private UserRetrievalService $userRetrievalService;

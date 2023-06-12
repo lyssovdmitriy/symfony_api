@@ -11,7 +11,7 @@ use App\Service\User\UserCreationService;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
-final class UserCreationServiceTest extends BaseUserServiceTest
+final class UserCreationServiceTest extends BaseUserService
 {
 
     private UserCreationService $userCreationService;
