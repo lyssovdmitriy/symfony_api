@@ -4,7 +4,10 @@ namespace App\Controller;
 
 use App\DTO\Application\ApplicationDTO;
 use App\Exception\ApiException;
-use App\RequestHandler\ApplicationRequestHandler;
+use App\RequestHandler\Application\ApplicationCreationRequestHandlerInterface;
+use App\RequestHandler\Application\ApplicationFileAttachmentRequestHandlerInterface;
+use App\RequestHandler\Application\ApplicationFileRetrievalRequestHandlerInterface;
+use App\RequestHandler\Application\ApplicationRetrievalRequestHandlerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,7 +23,10 @@ class ApiApplicationController extends AbstractController
 {
 
     public function __construct(
-        private ApplicationRequestHandler $applicationRequestHandler,
+        private ApplicationCreationRequestHandlerInterface $applicationCreationRequestHandler,
+        private ApplicationRetrievalRequestHandlerInterface $applicationRetrievalRequestHandler,
+        private ApplicationFileAttachmentRequestHandlerInterface $applicationFileAttachmentRequestHandler,
+        private ApplicationFileRetrievalRequestHandlerInterface $applicationFileRetrievalRequestHandler,
     ) {
     }
 
@@ -35,7 +41,7 @@ class ApiApplicationController extends AbstractController
         /** @var null|\App\Entity\User */
         $user = $this->getUser();
         $userId = $user?->getId() ?? throw new ApiException(404);
-        return $this->applicationRequestHandler->createApplication($request, $userId);
+        return $this->applicationCreationRequestHandler->handle($request, $userId);
     }
 
     #[Route('/api/applications/{id}', methods: ['GET'])]
@@ -50,7 +56,7 @@ class ApiApplicationController extends AbstractController
     )]
     public function getApplication(int $id): JsonResponse
     {
-        return $this->applicationRequestHandler->getApplication($id);
+        return $this->applicationRetrievalRequestHandler->handle($id);
     }
 
     #[Route('/api/applications/{id}/attach-file', methods: ['POST'])]
@@ -71,13 +77,13 @@ class ApiApplicationController extends AbstractController
     )]
     public function attachFile(Request $request, int $id): JsonResponse
     {
-        return $this->applicationRequestHandler->attachFile($request, $id);
+        return $this->applicationFileAttachmentRequestHandler->handle($request, $id);
     }
 
     #[Route('/api/applications/{id}/file', methods: ['GET'])]
     #[OA\Get(path: '/api/applications/{id}/file', summary: 'Get File')]
     public function getFileByApplicationId(int $id): StreamedResponse
     {
-        return $this->applicationRequestHandler->getFileByApplicationId($id);
+        return $this->applicationFileRetrievalRequestHandler->handle($id);
     }
 }

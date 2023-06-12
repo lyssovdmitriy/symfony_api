@@ -6,6 +6,6 @@ namespace App\Exception;
 
 use Exception;
 
-final class NotFountException extends Exception
+final class NotFoundException extends Exception
 {
 }

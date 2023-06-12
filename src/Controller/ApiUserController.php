@@ -10,8 +10,11 @@ use OpenApi\Attributes as OA;
 use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
 use App\Entity\User;
-use App\Repository\UserRepository;
-use App\RequestHandler\UserRequestHandler;
+use App\RequestHandler\User\UserCreationRequestHandlerInterface;
+use App\RequestHandler\User\UserDeletionRequestHandlerInterface;
+use App\RequestHandler\User\UserListRequestHandlerInterface;
+use App\RequestHandler\User\UserRetrievalRequestHandlerInterface;
+use App\RequestHandler\User\UserUpdateRequestHandlerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,7 +36,11 @@ class ApiUserController extends AbstractController
 {
 
     public function __construct(
-        private UserRequestHandler $userRequestHandler,
+        private UserCreationRequestHandlerInterface $userCreationRequestHandler,
+        private UserRetrievalRequestHandlerInterface $userRetrievalRequestHandler,
+        private UserUpdateRequestHandlerInterface $userUpdateRequestHandler,
+        private UserDeletionRequestHandlerInterface $userDeletionRequestHandler,
+        private UserListRequestHandlerInterface $userListRequestHandler,
     ) {
     }
 
@@ -67,7 +74,7 @@ class ApiUserController extends AbstractController
     )]
     public function createUser(Request $request): JsonResponse
     {
-        return $this->userRequestHandler->createUser($request);
+        return $this->userCreationRequestHandler->handle($request);
     }
 
 
@@ -96,7 +103,7 @@ class ApiUserController extends AbstractController
     public function getUserById(int $id): JsonResponse
     {
         $this->checkAuthForUserAction($id);
-        return $this->userRequestHandler->getUser($id);
+        return $this->userRetrievalRequestHandler->handle($id);
     }
 
 
@@ -125,7 +132,7 @@ class ApiUserController extends AbstractController
     public function updateUserById(int $id, Request $request): JsonResponse
     {
         $this->checkAuthForUserAction($id);
-        return $this->userRequestHandler->updateUser($id, $request);
+        return $this->userUpdateRequestHandler->handle($id, $request);
     }
 
 
@@ -154,7 +161,7 @@ class ApiUserController extends AbstractController
     public function deleteUserById(int $id): JsonResponse
     {
         $this->checkAuthForUserAction($id);
-        return $this->userRequestHandler->deleteUser($id);
+        return $this->userDeletionRequestHandler->handle($id);
     }
 
 
@@ -172,13 +179,11 @@ class ApiUserController extends AbstractController
             throw new AccessDeniedHttpException('Access denied.');
         }
 
-        return $this->userRequestHandler->getUsers(
+        return $this->userListRequestHandler->handle(
             $request->query->getInt('offset', 0),
             $request->query->getInt('limit', 10)
         );
     }
-
-
 
     private function checkAuthForUserAction(int $id): void
     {

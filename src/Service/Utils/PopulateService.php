@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace App\Service\Utils;
 
 use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuilder;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class PopulateService
+class PopulateService implements PopulateServiceInterface
 {
 
     public function __construct(
@@ -16,13 +16,7 @@ class PopulateService
     }
 
 
-    /**
-     * @template T of object
-     * @param object $entity
-     * @param class-string<T> $type
-     * @param string[] $groups
-     * @return T
-     */
+    /** @inheritDoc */
     public function populateDTOFromEntity(object $entity, string $type, array $groups): object
     {
 

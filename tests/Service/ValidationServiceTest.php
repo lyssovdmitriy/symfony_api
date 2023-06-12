@@ -3,7 +3,7 @@
 namespace App\Tests\Service;
 
 use App\DTO\User\UserDTO;
-use App\Service\ValidationService;
+use App\Service\Utils\ValidationService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationList;

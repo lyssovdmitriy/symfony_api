@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace App\Service\Utils;
 
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class ValidationService
+class ValidationService implements ValidationServiceInterface
 {
     public function __construct(
         private ValidatorInterface $validator

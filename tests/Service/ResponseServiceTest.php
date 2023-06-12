@@ -5,7 +5,7 @@ namespace App\Tests\Service;
 use App\DTO\BaseResponse\BaseResponseErrorDTO;
 use App\DTO\User\UserResponseSuccessDTO;
 use App\DTO\User\UserDTO;
-use App\Service\ResponseService;
+use App\Service\Utils\ResponseService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

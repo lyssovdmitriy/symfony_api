@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace App\EventListener;
 
 use App\DTO\BaseResponse\BaseResponseSuccessDataDTO;
-use App\Service\ResponseService;
+use App\Service\Utils\ResponseService;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationFailureEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTExpiredEvent;

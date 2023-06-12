@@ -2,7 +2,7 @@
 
 namespace App\Tests\Service;
 
-use App\Service\PopulateService;
+use App\Service\Utils\PopulateService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use stdClass;
